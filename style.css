@@ -17,9 +17,9 @@ body {
 .support {
     position: absolute;
     top: 220px; /* Adjust based on the desired position */
-    left: 380px; /* Adjust based on the desired position */
+    left: 430px; /* Adjust based on the desired position */
     width: 300px;
-    height: 25px;
+    height: 28px;
     background-color: green;
     display: flex;
     flex-direction: row;

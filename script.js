@@ -1,6 +1,3 @@
-
-
-
 // Get canvas element
 const canvas = document.getElementById('boardCanvas');
 const ctx = canvas.getContext('2d');
@@ -10,7 +7,7 @@ let initialAngles = [0, 0, 0];
 // Board properties
 const boardWidth = 150;
 const boardHeight = 25;
-let boardAngle = [0, 0, 0]; // Array to store angles of rotation in radians for each board
+let boardAngle = [0, 0, 60]; // Array to store angles of rotation in radians for each board
 
 // Function to draw a single wooden board
 function drawBoard(x, y, angle) {

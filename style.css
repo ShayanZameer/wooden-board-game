@@ -1,0 +1,40 @@
+body {
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+    background-color: #f0f0f0;
+}
+
+.container {
+    position: relative;
+    width: 100%;
+    height: 100vh;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+}
+
+.support {
+    position: absolute;
+    top: 220px; /* Adjust based on the desired position */
+    left: 380px; /* Adjust based on the desired position */
+    width: 300px;
+    height: 25px;
+    background-color: green;
+    display: flex;
+    flex-direction: row;
+}
+
+
+canvas {
+    margin-top: 200px; /* Adjust as needed */
+    border: 1px solid #000;
+}
+
+.buttons {
+    margin-top: 20px;
+}
+
+.buttons button {
+    margin-right: 10px;
+}

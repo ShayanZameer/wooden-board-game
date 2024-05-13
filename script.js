@@ -214,20 +214,11 @@ function returnToSetPosition() {
 
 
 function drawMuscles() {
-
-
-
-    
-
-
     boards[0].angle = -70;
     boards[0].width=140;
     boards[1].width=140;
-
     boards[1].angle = 65;
     boards[2].angle = 150;
-
-
     boards[0].y= 80
     boards[1].y= 190
 
@@ -243,9 +234,9 @@ function drawMuscles() {
 
 
     const muscleConfig = [
-        { startX: 240, startY: 40, endX: 245, endY: 95 }, // Muscle between top and middle board
-        { startX: 290, startY: 76, endX: 293, endY: 200 },
-        { startX: 245, startY: 180, endX: 245, endY: 275 }  // Muscle b
+        { startX: 225, startY: 40, endX: 232, endY: 95 }, 
+        { startX: 270, startY: 76, endX: 278, endY: 200 },
+        { startX: 230, startY: 180, endX: 230, endY: 280 }  
        
     ];
 

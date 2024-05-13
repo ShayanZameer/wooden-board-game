@@ -16,7 +16,7 @@ const boards = [
         angle: 90, 
         x: 270, 
         y: 120, 
-        dots: [{ x: -80, y: -25 }] // Array of dot positions for the top board
+        dots: [{ x: -75, y: -3 }] // Array of dot positions for the top board
     },
     { 
         width: 170, 
@@ -40,7 +40,7 @@ function drawBoard(board) {
     ctx.save();
     ctx.translate(board.x, board.y);
     ctx.rotate(board.angle * Math.PI / 180);
-    ctx.fillStyle = '#8B4513';
+    ctx.fillStyle = '#FFDB58';
     ctx.fillRect(-board.width / 2, -board.height / 2, board.width, board.height);
 
     // Draw dots at specified positions
@@ -79,6 +79,8 @@ function setPositions() {
     boards[0].width=200;
     boards[1].width=180;
     boards[2].width=180;// Adjust x, y positions
+   
+
 
     
 
@@ -86,6 +88,8 @@ function setPositions() {
 
     draw(); // Redraw with new positions
 }
+
+
 
 
 
@@ -146,16 +150,34 @@ function drawArrows() {
 
 
 
-// Function to relax the boards
+// // Function to relax the boards
 function relax() {
-    // Draw the arrows to show motion direction
+
+
+
+    boards[0].angle = -70;
+    boards[1].angle = 65;
+    boards[2].angle = 150;
+
+    boards[0].y= 120
+    boards[1].y= 265
+
+    boards[2].y=340
+    boards[2].x=300
+
     redraw();
     drawArrows();
 
     // Delay before returning to initial position
     setTimeout(() => {
+        
         boards.forEach((board, index) => {
-            board.angle = initialAngles[index]; // Reset angles to initial values
+            board.angle = initialAngles[index];
+            if(index===2){
+                board.x=245;
+                board.y=355;
+        
+            } // Reset angles to initial values
         });
         redraw();
     }, 5000); // Delay of 2000 milliseconds (2 seconds)
@@ -167,10 +189,13 @@ const initialAngles = [90, 90, 125]; // Adjust these as per your initial setup
 // Ensure all initial setups are correct
 boards.forEach((board, index) => {
     board.angle = initialAngles[index];
+
+    
+    
+    
 });
 
-// Initialize the drawing
-draw();
+
 
 
 // Function to return the boards to the set position

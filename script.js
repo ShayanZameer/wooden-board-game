@@ -16,7 +16,7 @@ const boards = [
         angle: 90, 
         x: 270, 
         y: 120, 
-        dots: [{ x: -50, y: -10 }] // Array of dot positions for the top board
+        dots: [{ x: -80, y: -25 }] // Array of dot positions for the top board
     },
     { 
         width: 170, 
@@ -24,7 +24,7 @@ const boards = [
         angle: 90, 
         x: 270, 
         y: 280, 
-        dots: [{ x: 10, y: 50 }] // Array of dot positions for the middle board
+        dots: [{ x: -80, y: -5 }] // Array of dot positions for the middle board
     },
     { 
         width: 150, 
@@ -32,7 +32,7 @@ const boards = [
         angle: 125, 
         x: 270, 
         y: 363, 
-        dots: [{ x: -50, y: 10 }, { x: 50, y: -10 }] // Array of dot positions for the bottom board
+        dots: [ { x: -10, y: -3 }] // Array of dot positions for the bottom board
     }
 ];
 
@@ -72,8 +72,8 @@ function setPositions() {
 
     // Update positions if necessary
     boards[0].x = 250; boards[0].y = 80;  // Adjust x, y positions
-    boards[1].x = 250; boards[1].y = 180; // Adjust x, y positions
-    boards[2].x = 300; boards[2].y = 235;
+    boards[1].x = 250; boards[1].y = 170; // Adjust x, y positions
+    boards[2].x = 325; boards[2].y = 215;
     
 
     boards[0].width=200;
@@ -84,65 +84,61 @@ function setPositions() {
 }
 
 
-// function drawArrows() {
-//     // Drawing arrows for each board
-//     const arrowSettings = [
-//         { startX: 270, startY: 120, endX: 270, endY: 80, color: 'red' }, // Arrow for the top board
-//         { startX: 270, startY: 280, endX: 270, endY: 180, color: 'red' }, // Arrow for the middle board
-//         { startX: 270, startY: 363, endX: 300, endY: 235, color: 'red' }  // Arrow for the bottom board
-//     ];
 
-//     arrowSettings.forEach(setting => {
-//         ctx.beginPath();
-//         ctx.moveTo(setting.startX, setting.startY);
-//         ctx.lineTo(setting.endX, setting.endY);
-//         ctx.strokeStyle = setting.color;
-//         ctx.lineWidth = 5;
-//         ctx.stroke();
 
-//         // Draw arrowheads
-//         ctx.beginPath();
-//         ctx.moveTo(setting.endX, setting.endY);
-//         ctx.lineTo(setting.endX - 5, setting.endY - 10);
-//         ctx.lineTo(setting.endX + 5, setting.endY - 10);
-//         ctx.lineTo(setting.endX, setting.endY);
-//         ctx.fillStyle = setting.color;
-//         ctx.fill();
-//     });
-// }
+
 
 
 
 
 function drawArrows() {
     const arrowConfig = [
-        { x: 270, y: 120, length: 60, angle: 90, width: 5 }, // Arrow for the top board
-        { x: 270, y: 280, length: 100, angle: 210, width: 5 }, // Arrow for the middle board
-        { x: 270, y: 363, length: 125, angle: 150, width: 5 }  // Arrow for the bottom board
+        {
+            startX: 270, startY: 120,
+            controlX: 270, controlY: 200,
+            endX: 270, endY: 80,
+            headLength: 10, headAngle: 90
+        },
+        {
+            startX: 270, startY: 280,
+            controlX: 300, controlY: 250,
+            endX: 290, endY: 200,
+            headLength: 10, headAngle: -60
+        },
+        {
+            startX: 270, startY: 360,
+            controlX: 320, controlY: 340,
+            endX: 310, endY: 320,
+            headLength: 20, headAngle: 75
+        }
     ];
 
     arrowConfig.forEach(config => {
         ctx.save();
-        ctx.translate(config.x, config.y);
-        ctx.rotate(config.angle * Math.PI / 180);
+
+        // Draw the tail of the arrow
         ctx.beginPath();
-        ctx.moveTo(0, 0);
-        ctx.lineTo(0, -config.length);
+        ctx.moveTo(config.startX, config.startY);
+        ctx.quadraticCurveTo(config.controlX, config.controlY, config.endX, config.endY);
         ctx.strokeStyle = 'red';
-        ctx.lineWidth = config.width;
+        ctx.lineWidth = 5;
         ctx.stroke();
 
-        // Draw arrowheads
+        // Draw the head of the arrow
+        ctx.translate(config.endX, config.endY);
+        ctx.rotate(config.headAngle * Math.PI / 180);
         ctx.beginPath();
-        ctx.moveTo(0, -config.length);
-        ctx.lineTo(10, -config.length + 10);
-        ctx.lineTo(-10, -config.length + 10);
+        ctx.moveTo(0, 10);
+        ctx.lineTo(-config.headLength, -config.headLength);
+        ctx.lineTo(config.headLength, -config.headLength);
         ctx.closePath();
         ctx.fillStyle = 'red';
         ctx.fill();
+
         ctx.restore();
     });
 }
+
 
 
 
@@ -158,7 +154,7 @@ function relax() {
             board.angle = initialAngles[index]; // Reset angles to initial values
         });
         redraw();
-    }, 3000); // Delay of 2000 milliseconds (2 seconds)
+    }, 5000); // Delay of 2000 milliseconds (2 seconds)
 }
 
 // Initial angles stored for each board
@@ -171,28 +167,6 @@ boards.forEach((board, index) => {
 
 // Initialize the drawing
 draw();
-
-
-// // Function to relax the boards
-// function relax() {
-//     // Show the arrows for some seconds
-//     redraw();
-//     drawArrows();
-
-//     // Delay before returning to initial position
-//     setTimeout(() => {
-//         boards.forEach((board, index) => {
-//             board.angle = initialAngles[index]; // Reset angles to initial values
-//         });
-//         redraw();
-//     }, 2000); // Delay of 2000 milliseconds (2 seconds)
-// }
-
-// // Initial drawing and setup
-// draw();
-
-
-
 
 
 // Function to return the boards to the set position
@@ -208,11 +182,6 @@ function showMuscles() {
     console.log("Muscles shown");
 }
 
-// Function to clear canvas and redraw
-// function redraw() {
-//     ctx.clearRect(0, 0, canvas.width, canvas.height);
-//     draw();
-// }
 
 function redraw() {
     ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear the canvas

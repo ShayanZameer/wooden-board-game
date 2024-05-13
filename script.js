@@ -4,10 +4,30 @@ const ctx = canvas.getContext('2d');
 
 let isPositionSet = false;
 
+let dragging = false; // Flag to check if a board is being dragged
+let selectedBoardIndex = null; 
+let initialMouseY = 0; // To track the initial mouse Y position for rotation calculations
+// To keep track of which board is being selected
+let initialAngle = 0;
+
+
+
 // Utility function to show popup messages
 function showPopup(message) {
     alert(message);
 }
+
+function calculateRotationAngle(mouseY) {
+    if (selectedBoardIndex !== null) {
+        const board = boards[selectedBoardIndex];
+        const dy = mouseY - initialMouseY;
+        board.angle += dy * 0.5; // Change 0.5 to adjust sensitivity
+        initialMouseY = mouseY; // Update initialMouseY to the new position after calculation
+        draw(); // Redraw to update board position
+    }
+}
+
+
 
 let currentmode="normal";
 const boards = [
@@ -15,24 +35,33 @@ const boards = [
         width: 170, 
         height: 28, 
         angle: 90, 
+        setAngle: 90,
         x: 270, 
-        y: 120, 
+        y: 120,
+        setX: 270,
+        setY: 120, 
         dots: [{ x: -75, y: -36 }] // Array of dot positions for the top board
     },
     { 
         width: 170, 
         height: 28, 
         angle: 90, 
+        setAngle: 90,
         x: 270, 
         y: 280, 
+        setX: 270,
+        setY: 280,
         dots: [{ x: -80, y: -2 }] // Array of dot positions for the middle board
     },
     { 
         width: 150, 
         height: 18, 
         angle: 125, 
+        setAngle: 125,
         x: 270, 
         y: 363, 
+        x: 270,
+        y: 363,
         dots: [ { x: -10, y: -1 }] // Array of dot positions for the bottom board
     }
 ];
@@ -43,42 +72,97 @@ function drawBoard(board) {
     ctx.rotate(board.angle * Math.PI / 180);
     ctx.fillStyle = '#FFDB58';
     ctx.fillRect(-board.width / 2, -board.height / 2, board.width, board.height);
-
-    // Draw dots at specified positions
     ctx.fillStyle = 'black';
     board.dots.forEach(dot => {
         ctx.beginPath();
         ctx.arc(dot.x, dot.y, 5, 0, Math.PI * 2);
-        ctx.fill()
+        ctx.fill();
     });
-
     ctx.restore();
 }
-// Draw the entire scene
+
 function draw() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear canvas
-    boards.forEach(board => drawBoard(board));       // Draw each board
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    boards.forEach(drawBoard);
 }
-function setPositions() {
-    // Adjust angles and positions to match the second picture
 
-    isPositionSet = true;
-    boards[0].angle = -30;  // Example angle, adjust as necessary
-    boards[1].angle = 30; // Example angle, adjust as necessary
-    boards[2].angle = -20;  // Example angle, adjust as necessary
 
-    // Update positions if necessary
-    boards[0].x = 250; boards[0].y = 80;  // Adjust x, y positions
-    boards[1].x = 250; boards[1].y = 170; // Adjust x, y positions
-    boards[2].x = 325; boards[2].y = 215;
-    
-
-    boards[0].width=200;
-    boards[1].width=180;
-    boards[2].width=180;// Adjust x, y positions
-   
-    draw(); // Redraw with new positions
+// Function to enable rotation of the boards
+function enableRotation() {
+    canvas.addEventListener('mousedown', onMouseDown);
+    canvas.addEventListener('mousemove', onMouseMove);
+    canvas.addEventListener('mouseup', onMouseUp);
 }
+
+function onMouseDown(e) {
+    const rect = canvas.getBoundingClientRect();
+    const mouseY = e.clientY - rect.top;
+
+    boards.forEach((board, index) => {
+        if (Math.abs(mouseY - board.y) < 50) {
+            dragging = true;
+            selectedBoardIndex = index;
+            initialMouseY = mouseY;
+        }
+    });
+}
+
+function calculateRotationAngle(board, mouseY, startY) {
+    const dy = mouseY - startY;
+    return board.angle + (dy / 2); // Divisor controls sensitivity of rotation
+}
+
+
+function onMouseMove(e) {
+    if (dragging && selectedBoardIndex !== null) {
+        const rect = canvas.getBoundingClientRect();
+        const mouseY = e.clientY - rect.top;
+        const dy = mouseY - initialMouseY;
+        // const deltaAngle = dy * 0.1; // Sensitivity of rotation
+
+        // Adjust board angle and ensure it remains within 0-360 degrees
+        const board = boards[selectedBoardIndex];
+        // board.angle = (360 + board.angle + deltaAngle) % 360;
+        board.angle = calculateRotationAngle(board, mouseY, board.y);
+
+        // initialMouseY = mouseY;
+        draw();
+    }
+}
+
+
+
+function onMouseUp() {
+    dragging = false;
+    selectedBoardIndex = null;
+}
+
+// Function to disable rotation of the boards
+function disableRotation() {
+    canvas.removeEventListener('mousedown', onMouseDown);
+    canvas.removeEventListener('mousemove', onMouseMove);
+    canvas.removeEventListener('mouseup', onMouseUp);
+}
+
+document.getElementById('setPositionsBtn').addEventListener('click', function() {
+    if (!isPositionSet) {
+
+        boards.forEach(board => {
+            board.setAngle = board.angle;
+            board.setX = board.x;
+            board.setY = board.y;
+        });
+        isPositionSet = true;
+        disableRotation();
+        alert("Positions set. Boards are locked.");
+    }
+});
+
+// Initial drawing
+enableRotation();
+draw();
+
+
 
 function drawArrows() {
     let arrowConfig;
@@ -102,11 +186,12 @@ function drawArrows() {
         
 
         {
-            startX: 260 - 90, // Reverse direction by moving startX farther from endX
+            startX: 260 - 90, 
+            
             startY: 370, // Move the arrow up by adjusting startY
             controlX: 320 - 50, // Adjusted to keep the control point in line with new startX and endX
             controlY: 390, // Move the control point up to maintain the curve
-            endX: 390 - 90, // Reverse direction by moving endX farther from startX
+            endX: 390 - 90, 
             endY: 370, // Move the arrow up by adjusting endY
             headLength: 10,
             headAngle: -15 // Angle adjusted to maintain the same pointing direction
@@ -181,23 +266,30 @@ function drawArrows() {
         ctx.restore();
     });
 }
+
+
+function resetBoardPositions() {
+    boards.forEach((board, index) => {
+        board.angle = initialAngles[index];
+        if (index === 2) {
+            board.x = 270; // Reset x position if modified
+            board.y = 363; // Reset y position if modified
+        }
+    });
+    redraw();
+}
 // // Function to relax the boards
 function relax() {
     if (!isPositionSet) {
         showPopup("Boards are already in relax position");
         return;
     }
+
+    
     currentmode= "relax"
-    boards[0].angle = -70;
-    boards[1].angle = 65;
-    boards[2].angle = 150;
-    boards[0].y= 120
-    boards[1].y= 265
-    boards[2].y=340
-    boards[2].x=300
+    // 
     redraw();
-    drawArrows();
-    // Delay before returning to initial position
+   
     setTimeout(() => {
         
         boards.forEach((board, index) => {
@@ -220,49 +312,56 @@ boards.forEach((board, index) => {
     board.angle = initialAngles[index];
 });
 // Function to return the boards to the set position
+
+
+
 function returnToSetPosition() {
     if (!isPositionSet) {
         showPopup("First press Set Position button");
         return;
     }
-    // Reset the angles of rotation to the previously set positions
-    setPositions();
-}
-function drawMuscles() {
-    currentmode="muscles";
-    boards[0].angle = -70;
-    boards[0].width=140;
-    boards[1].width=140;
-    boards[1].angle = 65;
-    boards[2].angle = 150;
-    boards[0].y= 80
-    boards[1].y= 190
-
-    boards[2].y=260
-    boards[2].x=290
-
-    boards[1].dots.x=-95
-    boards[0].dots.x=-85
-    redraw();
-    drawArrows();
-    const muscleConfig = [
-        { startX: 225, startY: 40, endX: 232, endY: 95 }, 
-        { startX: 270, startY: 76, endX: 278, endY: 200 },
-        { startX: 230, startY: 180, endX: 230, endY: 280 }  
-       
-    ];
-
-    muscleConfig.forEach(muscle => {
-        ctx.save();
-        ctx.beginPath();
-        ctx.moveTo(muscle.startX, muscle.startY);
-        ctx.lineTo(muscle.endX, muscle.endY);
-        ctx.strokeStyle = 'grey';
-        ctx.lineWidth = 4; // Thicker line for visibility
-        ctx.stroke();
-        ctx.restore();
+    boards.forEach(board => {
+        board.angle = board.setAngle;
+        board.x = board.setX;
+        board.y = board.setY;
     });
+    draw(); // Redraw the boards in their set positions
 }
+
+
+function drawBands() {
+    ctx.beginPath();
+    // Band between first and second board
+    ctx.moveTo(boards[0].x, boards[0].y + boards[0].height / 2);
+    ctx.lineTo(boards[1].x, boards[1].y - boards[1].height / 2);
+    
+    // Band between second and third board
+    ctx.moveTo(boards[1].x, boards[1].y + boards[1].height / 2);
+    ctx.lineTo(boards[2].x, boards[2].y - boards[2].height / 2);
+
+    ctx.strokeStyle = 'yellow';
+    ctx.lineWidth = 5; // Width of the band
+    ctx.stroke();
+}
+
+function drawMuscles() {
+    currentmode = "muscles";
+    redraw(); // Clear and redraw the scene
+    drawBands(); // Draw the band
+}
+
+function showMuscles() {
+    if (!isPositionSet) {
+        showPopup("No muscles shown. Set positions first.");
+        return;
+    }
+    redraw(); // Clear and redraw the scene
+    drawMuscles(); // Draw the muscles
+}
+
+document.getElementById('showMusclesBtn').addEventListener('click', showMuscles);
+
+
 
 // Modify the showMuscles function to draw muscles
 function showMuscles() {
@@ -282,7 +381,6 @@ function redraw() {
 // Initialize the drawing
 draw();
 // Event listeners for buttons
-document.getElementById('setPositionsBtn').addEventListener('click', setPositions);
 document.getElementById('relaxBtn').addEventListener('click', relax);
 document.getElementById('returnToSetPositionBtn').addEventListener('click', returnToSetPosition);
-document.getElementById('showMusclesBtn').addEventListener('click', showMuscles);
+// document.getElementById('showMusclesBtn').addEventListener('click', showMuscles);

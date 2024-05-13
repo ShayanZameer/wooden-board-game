@@ -17,7 +17,7 @@ const boards = [
         angle: 90, 
         x: 270, 
         y: 120, 
-        dots: [{ x: -75, y: -3 }] // Array of dot positions for the top board
+        dots: [{ x: -75, y: -36 }] // Array of dot positions for the top board
     },
     { 
         width: 170, 
@@ -142,14 +142,14 @@ function drawArrows() {
         headAngle: -45 // Arrow head angle (unchanged)
     },
     {
-        startX: 270, // Reverse direction by moving startX farther from endX
+        startX: 270, 
         startY: 200, // Move the arrow up by adjusting startY
         controlX: 300, // Adjusted to keep the control point in line with new startX and endX
         controlY: 270, // Move the control point up to maintain the curve
         endX: 350, // Reverse direction by moving endX farther from startX
         endY: 170, // Move the arrow up by adjusting endY
         headLength: 10,
-        headAngle: -45 // Angle adjusted to maintain the same pointing direction
+        headAngle: -45 
     }
    
     

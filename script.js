@@ -3,7 +3,7 @@
 // Get canvas element
 const canvas = document.getElementById('boardCanvas');
 const ctx = canvas.getContext('2d');
-let initialAngles = [0, 0, 0];
+// let initialAngles = [0, 0, 0];
 
 
 
@@ -84,30 +84,113 @@ function setPositions() {
 }
 
 
+// function drawArrows() {
+//     // Drawing arrows for each board
+//     const arrowSettings = [
+//         { startX: 270, startY: 120, endX: 270, endY: 80, color: 'red' }, // Arrow for the top board
+//         { startX: 270, startY: 280, endX: 270, endY: 180, color: 'red' }, // Arrow for the middle board
+//         { startX: 270, startY: 363, endX: 300, endY: 235, color: 'red' }  // Arrow for the bottom board
+//     ];
+
+//     arrowSettings.forEach(setting => {
+//         ctx.beginPath();
+//         ctx.moveTo(setting.startX, setting.startY);
+//         ctx.lineTo(setting.endX, setting.endY);
+//         ctx.strokeStyle = setting.color;
+//         ctx.lineWidth = 5;
+//         ctx.stroke();
+
+//         // Draw arrowheads
+//         ctx.beginPath();
+//         ctx.moveTo(setting.endX, setting.endY);
+//         ctx.lineTo(setting.endX - 5, setting.endY - 10);
+//         ctx.lineTo(setting.endX + 5, setting.endY - 10);
+//         ctx.lineTo(setting.endX, setting.endY);
+//         ctx.fillStyle = setting.color;
+//         ctx.fill();
+//     });
+// }
+
+
+
+
+function drawArrows() {
+    const arrowConfig = [
+        { x: 270, y: 120, length: 60, angle: 90, width: 5 }, // Arrow for the top board
+        { x: 270, y: 280, length: 100, angle: 210, width: 5 }, // Arrow for the middle board
+        { x: 270, y: 363, length: 125, angle: 150, width: 5 }  // Arrow for the bottom board
+    ];
+
+    arrowConfig.forEach(config => {
+        ctx.save();
+        ctx.translate(config.x, config.y);
+        ctx.rotate(config.angle * Math.PI / 180);
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        ctx.lineTo(0, -config.length);
+        ctx.strokeStyle = 'red';
+        ctx.lineWidth = config.width;
+        ctx.stroke();
+
+        // Draw arrowheads
+        ctx.beginPath();
+        ctx.moveTo(0, -config.length);
+        ctx.lineTo(10, -config.length + 10);
+        ctx.lineTo(-10, -config.length + 10);
+        ctx.closePath();
+        ctx.fillStyle = 'red';
+        ctx.fill();
+        ctx.restore();
+    });
+}
+
+
+
+// Function to relax the boards
+function relax() {
+    // Draw the arrows to show motion direction
+    redraw();
+    drawArrows();
+
+    // Delay before returning to initial position
+    setTimeout(() => {
+        boards.forEach((board, index) => {
+            board.angle = initialAngles[index]; // Reset angles to initial values
+        });
+        redraw();
+    }, 3000); // Delay of 2000 milliseconds (2 seconds)
+}
+
+// Initial angles stored for each board
+const initialAngles = [90, 90, 125]; // Adjust these as per your initial setup
+
+// Ensure all initial setups are correct
+boards.forEach((board, index) => {
+    board.angle = initialAngles[index];
+});
+
+// Initialize the drawing
+draw();
+
 
 // // Function to relax the boards
-function relax() {
+// function relax() {
+//     // Show the arrows for some seconds
+//     redraw();
+//     drawArrows();
 
-    const angles=[0,0,20];
-    // Reset the angles of rotation to their initial values
-    boards.forEach((board, index) => {
+//     // Delay before returning to initial position
+//     setTimeout(() => {
+//         boards.forEach((board, index) => {
+//             board.angle = initialAngles[index]; // Reset angles to initial values
+//         });
+//         redraw();
+//     }, 2000); // Delay of 2000 milliseconds (2 seconds)
+// }
 
+// // Initial drawing and setup
+// draw();
 
-        if(index===0){
-        board.angle = 0;
-        }
-        else if(index===1){
-            board.angle = 0;
-
-
-        }else{
-            board.angle = 20;
-
-
-        }
-    });
-    redraw();
-}
 
 
 

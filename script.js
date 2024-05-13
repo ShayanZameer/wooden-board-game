@@ -3,12 +3,6 @@
 // Get canvas element
 const canvas = document.getElementById('boardCanvas');
 const ctx = canvas.getContext('2d');
-// let initialAngles = [0, 0, 0];
-
-
-
-
-
 const boards = [
     { 
         width: 170, 
@@ -101,24 +95,36 @@ function setPositions() {
 
 function drawArrows() {
     const arrowConfig = [
+        
+
         {
-            startX: 270, startY: 120,
-            controlX: 270, controlY: 200,
-            endX: 270, endY: 80,
-            headLength: 10, headAngle: 90
+            startX: 180, startY: 120, // Adjust startY to move the arrow up
+            controlX: 270-10, controlY: 170, // Adjust controlY to move the arrow up
+            endX: 320, endY: 120, // Adjust endY to move the arrow up
+            headLength: 10, headAngle: -15
         },
         {
-            startX: 270, startY: 280,
-            controlX: 300, controlY: 250,
-            endX: 290, endY: 200,
-            headLength: 10, headAngle: -60
+            startX: 320, startY: 220+50,
+            controlX: 270 + 10, controlY: 270+50,
+            endX: 180, endY: 220+50,
+            headLength: 10, headAngle: 15 // Adjust headAngle to reverse the direction
         },
+       
+        
+
         {
-            startX: 270, startY: 360,
-            controlX: 320, controlY: 340,
-            endX: 310, endY: 320,
-            headLength: 20, headAngle: 75
+            startX: 260 - 90, // Reverse direction by moving startX farther from endX
+            startY: 370, // Move the arrow up by adjusting startY
+            controlX: 320 - 50, // Adjusted to keep the control point in line with new startX and endX
+            controlY: 390, // Move the control point up to maintain the curve
+            endX: 390 - 90, // Reverse direction by moving endX farther from startX
+            endY: 370, // Move the arrow up by adjusting endY
+            headLength: 10,
+            headAngle: -15 // Angle adjusted to maintain the same pointing direction
         }
+        
+        
+        
     ];
 
     arrowConfig.forEach(config => {
@@ -129,7 +135,7 @@ function drawArrows() {
         ctx.moveTo(config.startX, config.startY);
         ctx.quadraticCurveTo(config.controlX, config.controlY, config.endX, config.endY);
         ctx.strokeStyle = 'red';
-        ctx.lineWidth = 5;
+        ctx.lineWidth = 2;
         ctx.stroke();
 
         // Draw the head of the arrow
@@ -204,11 +210,62 @@ function returnToSetPosition() {
     setPositions();
 }
 
-// Function to show muscles
+
+
+
+function drawMuscles() {
+
+
+
+    
+
+
+    boards[0].angle = -70;
+    boards[0].width=140;
+    boards[1].width=140;
+
+    boards[1].angle = 65;
+    boards[2].angle = 150;
+
+
+    boards[0].y= 80
+    boards[1].y= 190
+
+    boards[2].y=260
+    boards[2].x=290
+
+    boards[1].dots.x=-95
+    boards[0].dots.x=-85
+
+
+    redraw();
+    drawArrows();
+
+
+    const muscleConfig = [
+        { startX: 240, startY: 40, endX: 245, endY: 95 }, // Muscle between top and middle board
+        { startX: 290, startY: 76, endX: 293, endY: 200 },
+        { startX: 245, startY: 180, endX: 245, endY: 275 }  // Muscle b
+       
+    ];
+
+    muscleConfig.forEach(muscle => {
+        ctx.save();
+        ctx.beginPath();
+        ctx.moveTo(muscle.startX, muscle.startY);
+        ctx.lineTo(muscle.endX, muscle.endY);
+        ctx.strokeStyle = 'grey';
+        ctx.lineWidth = 4; // Thicker line for visibility
+        ctx.stroke();
+        ctx.restore();
+    });
+}
+
+// Modify the showMuscles function to draw muscles
 function showMuscles() {
-    // Logic to show muscles
-    // For now, let's just log a message
-    console.log("Muscles shown");
+    redraw(); // Clear and redraw the scene
+    drawMuscles(); // Draw the muscles
+    // Optionally draw arrows or other annotations if needed
 }
 
 

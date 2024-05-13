@@ -1,9 +1,13 @@
-
-
 // Get canvas element
 const canvas = document.getElementById('boardCanvas');
 const ctx = canvas.getContext('2d');
 
+let isPositionSet = false;
+
+// Utility function to show popup messages
+function showPopup(message) {
+    alert(message);
+}
 
 let currentmode="normal";
 const boards = [
@@ -50,19 +54,15 @@ function drawBoard(board) {
 
     ctx.restore();
 }
-
-
 // Draw the entire scene
 function draw() {
     ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear canvas
     boards.forEach(board => drawBoard(board));       // Draw each board
 }
-
-
-
-
 function setPositions() {
     // Adjust angles and positions to match the second picture
+
+    isPositionSet = true;
     boards[0].angle = -30;  // Example angle, adjust as necessary
     boards[1].angle = 30; // Example angle, adjust as necessary
     boards[2].angle = -20;  // Example angle, adjust as necessary
@@ -77,36 +77,15 @@ function setPositions() {
     boards[1].width=180;
     boards[2].width=180;// Adjust x, y positions
    
-
-
-    
-
-
-
     draw(); // Redraw with new positions
 }
-
-
-
-
-
-
-
-
-
-
 
 function drawArrows() {
     let arrowConfig;
 
 
         if(currentmode==="relax"){
-
-
-
             arrowConfig=[
-        
-
         {
             startX: 180, startY: 120, // Adjust startY to move the arrow up
             controlX: 270-10, controlY: 170, // Adjust controlY to move the arrow up
@@ -131,58 +110,53 @@ function drawArrows() {
             endY: 370, // Move the arrow up by adjusting endY
             headLength: 10,
             headAngle: -15 // Angle adjusted to maintain the same pointing direction
-        }
-        
-        
+        }     
         
     ];
 } if (currentmode==="muscles"){
         arrowConfig=[
-    
-
-    
-
-    
 
     {
-        startX: 220, // Start X, potentially the right-most or middle point
-        startY: 120, // Start Y, same as before
-        controlX: 200, // Control X moved slightly to the left for a sharper ascent
-        controlY: 100, // Control Y lowered to pull the curve upwards
+        startX: 230, // Start X, potentially the right-most or middle point
+        startY: 100, // Start Y, same as before
+        controlX: 180, // Control X moved slightly to the left for a sharper ascent
+        controlY: 150, // Control Y lowered to pull the curve upwards
         endX: 180, // End X remains close to startX to emphasize vertical movement
-        endY: 90, // End Y lowered to make the arrow move further up
+        endY: 70, // End Y lowered to make the arrow move further up
         headLength: 10,
-        headAngle: 90 // Arrow head pointing upward, directly up
+        headAngle: 30 // Arrow head pointing upward, directly up
     },
+
+    
+    
     
     
     {
-        startX: 320, startY: 220+50,
-        controlX: 270 + 10, controlY: 270+50,
-        endX: 180, endY: 220+50,
-        headLength: 10, headAngle: 15 // Adjust headAngle to reverse the direction
+        startX: 240, // Start X, remains unchanged
+        startY: 280, // Adjusted to shorten the length of the arrow
+        controlX: 110, // Control X, remains unchanged
+        controlY: 270, // Adjusted to shorten the length of the arrow
+        endX: 120, // End X, remains unchanged
+        endY: 220, // Adjusted to shorten the length of the arrow
+        headLength: 10, // Arrow head length (unchanged)
+        headAngle: -45 // Arrow head angle (unchanged)
     },
+    {
+        startX: 270, // Reverse direction by moving startX farther from endX
+        startY: 200, // Move the arrow up by adjusting startY
+        controlX: 300, // Adjusted to keep the control point in line with new startX and endX
+        controlY: 270, // Move the control point up to maintain the curve
+        endX: 350, // Reverse direction by moving endX farther from startX
+        endY: 170, // Move the arrow up by adjusting endY
+        headLength: 10,
+        headAngle: -45 // Angle adjusted to maintain the same pointing direction
+    }
    
     
 
-    {
-        startX: 260 - 90, // Reverse direction by moving startX farther from endX
-        startY: 370, // Move the arrow up by adjusting startY
-        controlX: 320 - 50, // Adjusted to keep the control point in line with new startX and endX
-        controlY: 390, // Move the control point up to maintain the curve
-        endX: 390 - 90, // Reverse direction by moving endX farther from startX
-        endY: 370, // Move the arrow up by adjusting endY
-        headLength: 10,
-        headAngle: -15 // Angle adjusted to maintain the same pointing direction
-    }
-    
-    
-    
 ];
-
 }
-
-    arrowConfig.forEach(config => {
+  arrowConfig.forEach(config => {
         ctx.save();
 
         // Draw the tail of the arrow
@@ -207,30 +181,22 @@ function drawArrows() {
         ctx.restore();
     });
 }
-
-
-
-
 // // Function to relax the boards
 function relax() {
-
+    if (!isPositionSet) {
+        showPopup("Boards are already in relax position");
+        return;
+    }
     currentmode= "relax"
-
-
-
     boards[0].angle = -70;
     boards[1].angle = 65;
     boards[2].angle = 150;
-
     boards[0].y= 120
     boards[1].y= 265
-
     boards[2].y=340
     boards[2].x=300
-
     redraw();
     drawArrows();
-
     // Delay before returning to initial position
     setTimeout(() => {
         
@@ -243,7 +209,7 @@ function relax() {
             } // Reset angles to initial values
         });
         redraw();
-    }, 5000); // Delay of 2000 milliseconds (2 seconds)
+    }, 2000); // Delay of 2000 milliseconds (2 seconds)
 }
 
 // Initial angles stored for each board
@@ -252,26 +218,17 @@ const initialAngles = [90, 90, 125]; // Adjust these as per your initial setup
 // Ensure all initial setups are correct
 boards.forEach((board, index) => {
     board.angle = initialAngles[index];
-
-    
-    
-    
 });
-
-
-
-
 // Function to return the boards to the set position
 function returnToSetPosition() {
+    if (!isPositionSet) {
+        showPopup("First press Set Position button");
+        return;
+    }
     // Reset the angles of rotation to the previously set positions
     setPositions();
 }
-
-
-
-
 function drawMuscles() {
-
     currentmode="muscles";
     boards[0].angle = -70;
     boards[0].width=140;
@@ -286,12 +243,8 @@ function drawMuscles() {
 
     boards[1].dots.x=-95
     boards[0].dots.x=-85
-
-
     redraw();
     drawArrows();
-
-
     const muscleConfig = [
         { startX: 225, startY: 40, endX: 232, endY: 95 }, 
         { startX: 270, startY: 76, endX: 278, endY: 200 },
@@ -313,22 +266,21 @@ function drawMuscles() {
 
 // Modify the showMuscles function to draw muscles
 function showMuscles() {
+
+    if (!isPositionSet) {
+        showPopup("No muscles shown. Set positions first.");
+        return;
+    }
     redraw(); // Clear and redraw the scene
     drawMuscles(); // Draw the muscles
     // Optionally draw arrows or other annotations if needed
 }
-
-
 function redraw() {
     ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear the canvas
     draw(); // Redraw all elements
 }
-
 // Initialize the drawing
 draw();
-
-
-
 // Event listeners for buttons
 document.getElementById('setPositionsBtn').addEventListener('click', setPositions);
 document.getElementById('relaxBtn').addEventListener('click', relax);

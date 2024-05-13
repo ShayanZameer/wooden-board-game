@@ -64,58 +64,6 @@ function draw() {
 
 
 
-
-
-
-// Draw the support and boards
-// function draw() {
-//     // Draw support
-//     const supportX = 250; // Adjust based on support position
-//     const supportY = canvas.height / 12;
-
-//     // Draw boards
-//     const gap = -45; // Gap between boards
-//     const startY = supportY + 60; // Adjusted start position
-//     let currentX = supportX + 40; // Starting position for the first board
-//     let offsetY = 0; // Initialize offset
-
-    
-//     boards.forEach((board, index) => {
-//         const dotX = board.dotX !== undefined ? board.dotX : 0;
-//         const dotY = startY + index * (board.width + gap) + board.height / 2;
-//         drawBoard(currentX, startY + index * (board.width + gap), board.angle, board.width, board.height, dotX, dotY);
-//         offsetY += board.height + gap; // Update offset for next board
-
-//     });
-// }
-
-
-
-
-
-
-// function setPositions() {
-//     // Define custom angles and positions for each board
-//     const settings = [
-//         { width: 180, height: 25, x: 160, y: 300, angle: -40 },
-//         { width: 170, height: 25, x: 160, y: 120, angle: 40 },
-//         { width: 150, height: 20, x: 140, y: 160, angle: -30 }
-//     ];
-
-//     // Apply custom settings to each board
-//     boards.forEach((board, index) => {
-//         board.width = settings[index].width;
-//         board.height = settings[index].height;
-//         board.x = settings[index].x;
-//         board.y = settings[index].y;
-//         board.angle = settings[index].angle;
-//     });
-
-//     // Redraw the canvas to reflect the changes
-//     redraw();
-// }
-
-
 function setPositions() {
     // Adjust angles and positions to match the second picture
     boards[0].angle = -30;  // Example angle, adjust as necessary

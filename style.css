@@ -16,7 +16,7 @@ body {
 }
 
 .support {
-    position: absolute;
+    position: relative;
     top: 215px; /* Adjust based on the desired position */
     left: 435px; /* Adjust based on the desired position */
     width: 300px;

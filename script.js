@@ -3,6 +3,9 @@
 // Get canvas element
 const canvas = document.getElementById('boardCanvas');
 const ctx = canvas.getContext('2d');
+
+
+let currentmode="normal";
 const boards = [
     { 
         width: 170, 
@@ -94,7 +97,14 @@ function setPositions() {
 
 
 function drawArrows() {
-    const arrowConfig = [
+    let arrowConfig;
+
+
+        if(currentmode==="relax"){
+
+
+
+            arrowConfig=[
         
 
         {
@@ -126,6 +136,51 @@ function drawArrows() {
         
         
     ];
+} if (currentmode==="muscles"){
+        arrowConfig=[
+    
+
+    
+
+    
+
+    {
+        startX: 220, // Start X, potentially the right-most or middle point
+        startY: 120, // Start Y, same as before
+        controlX: 200, // Control X moved slightly to the left for a sharper ascent
+        controlY: 100, // Control Y lowered to pull the curve upwards
+        endX: 180, // End X remains close to startX to emphasize vertical movement
+        endY: 90, // End Y lowered to make the arrow move further up
+        headLength: 10,
+        headAngle: 90 // Arrow head pointing upward, directly up
+    },
+    
+    
+    {
+        startX: 320, startY: 220+50,
+        controlX: 270 + 10, controlY: 270+50,
+        endX: 180, endY: 220+50,
+        headLength: 10, headAngle: 15 // Adjust headAngle to reverse the direction
+    },
+   
+    
+
+    {
+        startX: 260 - 90, // Reverse direction by moving startX farther from endX
+        startY: 370, // Move the arrow up by adjusting startY
+        controlX: 320 - 50, // Adjusted to keep the control point in line with new startX and endX
+        controlY: 390, // Move the control point up to maintain the curve
+        endX: 390 - 90, // Reverse direction by moving endX farther from startX
+        endY: 370, // Move the arrow up by adjusting endY
+        headLength: 10,
+        headAngle: -15 // Angle adjusted to maintain the same pointing direction
+    }
+    
+    
+    
+];
+
+}
 
     arrowConfig.forEach(config => {
         ctx.save();
@@ -158,6 +213,8 @@ function drawArrows() {
 
 // // Function to relax the boards
 function relax() {
+
+    currentmode= "relax"
 
 
 
@@ -214,6 +271,8 @@ function returnToSetPosition() {
 
 
 function drawMuscles() {
+
+    currentmode="muscles";
     boards[0].angle = -70;
     boards[0].width=140;
     boards[1].width=140;

@@ -11,7 +11,7 @@ const ctx = canvas.getContext('2d');
 
 const boards = [
     { 
-        width: 150, 
+        width: 170, 
         height: 28, 
         angle: 90, 
         x: 270, 
@@ -24,7 +24,7 @@ const boards = [
         angle: 90, 
         x: 270, 
         y: 280, 
-        dots: [{ x: -80, y: -5 }] // Array of dot positions for the middle board
+        dots: [{ x: -80, y: -2 }] // Array of dot positions for the middle board
     },
     { 
         width: 150, 
@@ -32,7 +32,7 @@ const boards = [
         angle: 125, 
         x: 270, 
         y: 363, 
-        dots: [ { x: -10, y: -3 }] // Array of dot positions for the bottom board
+        dots: [ { x: -10, y: -1 }] // Array of dot positions for the bottom board
     }
 ];
 
@@ -79,6 +79,10 @@ function setPositions() {
     boards[0].width=200;
     boards[1].width=180;
     boards[2].width=180;// Adjust x, y positions
+
+    
+
+
 
     draw(); // Redraw with new positions
 }

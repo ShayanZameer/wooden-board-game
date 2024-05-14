@@ -4,6 +4,9 @@ const ctx = canvas.getContext('2d');
 
 let isPositionSet = false;
 
+let showMuscles = false;
+
+
 let dragging = false; // Flag to check if a board is being dragged
 let selectedBoardIndex = null; 
 let initialMouseY = 0; // To track the initial mouse Y position for rotation calculations
@@ -15,6 +18,16 @@ let initialAngle = 0;
 // Utility function to show popup messages
 function showPopup(message) {
     alert(message);
+}
+
+
+function calculateMuscleDotPositions(board) {
+    const offset = 30; // Offset from the center of the board to place muscle dots
+    const angleRad = board.angle * Math.PI / 180;
+    return [
+        { x: board.width / 2 * Math.cos(angleRad), y: board.width / 2 * Math.sin(angleRad) }, // Top center
+        { x: -board.width / 2 * Math.cos(angleRad), y: -board.width / 2 * Math.sin(angleRad) } // Bottom center
+    ];
 }
 
 function calculateRotationAngle(mouseY) {
@@ -36,6 +49,7 @@ const boards = [
         height: 28, 
         angle: 90, 
         setAngle: 90,
+        initialAngle: 90,
         x: 270, 
         y: 120,
         setX: 270,
@@ -47,6 +61,7 @@ const boards = [
         height: 28, 
         angle: 90, 
         setAngle: 90,
+        initialAngle: 90,
         x: 270, 
         y: 280, 
         setX: 270,
@@ -58,6 +73,7 @@ const boards = [
         height: 18, 
         angle: 125, 
         setAngle: 125,
+        initialAngle: 125,
         x: 270, 
         y: 363, 
         x: 270,
@@ -78,12 +94,43 @@ function drawBoard(board) {
         ctx.arc(dot.x, dot.y, 5, 0, Math.PI * 2);
         ctx.fill();
     });
+
+    // Calculate muscle dot positions and draw them if muscles are shown
+    if (showMuscles) {
+        const muscleDots = calculateMuscleDotPositions(board);
+        ctx.fillStyle = 'red';
+        muscleDots.forEach(dot => {
+            ctx.beginPath();
+            ctx.arc(dot.x, dot.y, 5, 0, 2 * Math.PI);
+            ctx.fill();
+        });
+        board.muscleDots = muscleDots; // Save the calculated positions to the board for band drawing
+    }
     ctx.restore();
 }
+
+
 
 function draw() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     boards.forEach(drawBoard);
+    if (showMuscles) {
+        drawMuscles();
+        drawAdditionalDots();
+    }
+}
+
+function drawAdditionalDots() {
+    boards.forEach(board => {
+        const angle = board.angle * Math.PI / 180;
+        const muscleDotX = board.x + Math.cos(angle) * (board.width / 2 + 20); // Position offset for demonstration
+        const muscleDotY = board.y + Math.sin(angle) * (board.width / 2 + 20); // Position offset for demonstration
+        
+        ctx.beginPath();
+        ctx.arc(muscleDotX, muscleDotY, 5, 0, 2 * Math.PI);
+        ctx.fillStyle = 'red';
+        ctx.fill();
+    });
 }
 
 
@@ -161,6 +208,18 @@ document.getElementById('setPositionsBtn').addEventListener('click', function() 
 // Initial drawing
 enableRotation();
 draw();
+
+
+
+function calculateMuscleDotPositions(board) {
+    // Calculate positions for red dots based on board rotation and position
+    const angleRad = board.angle * Math.PI / 180;
+    const offset = 30; // Distance from the center of the board
+    return [
+        { x: Math.cos(angleRad) * offset, y: Math.sin(angleRad) * offset }, // Upper red dot
+        { x: -Math.cos(angleRad) * offset, y: -Math.sin(angleRad) * offset } // Lower red dot
+    ];
+}
 
 
 
@@ -278,40 +337,38 @@ function resetBoardPositions() {
     });
     redraw();
 }
-// // Function to relax the boards
-function relax() {
+
+
+document.getElementById('relaxBtn').addEventListener('click', function() {
     if (!isPositionSet) {
-        showPopup("Boards are already in relax position");
+        alert("Set positions first.");
         return;
     }
+    let interval = setInterval(() => {
+        let isAnimating = false;
+        boards.forEach(board => {
+            if (board.angle !== board.initialAngle) {
+                isAnimating = true;
+                const angleDifference = board.initialAngle - board.angle;
+                board.angle += angleDifference * 0.05; // Smoothly adjust the angle
 
-    
-    currentmode= "relax"
-    // 
-    redraw();
-   
-    setTimeout(() => {
-        
-        boards.forEach((board, index) => {
-            board.angle = initialAngles[index];
-            if(index===2){
-                board.x=245;
-                board.y=355;
-        
-            } // Reset angles to initial values
+                // Once the angle is close enough to the initial angle, set it exactly to stop the animation
+                if (Math.abs(angleDifference) < 0.1) {
+                    board.angle = board.initialAngle;
+                }
+            }
         });
-        redraw();
-    }, 2000); // Delay of 2000 milliseconds (2 seconds)
-}
 
-// Initial angles stored for each board
-const initialAngles = [90, 90, 125]; // Adjust these as per your initial setup
+        draw(); // Redraw the boards with the updated angles
 
-// Ensure all initial setups are correct
-boards.forEach((board, index) => {
-    board.angle = initialAngles[index];
+        // Stop the animation if no board needs further adjustment
+        if (!isAnimating) {
+            clearInterval(interval);
+        }
+    }, 10); // The time interval of 10 ms for smooth animation
 });
-// Function to return the boards to the set position
+
+
 
 
 
@@ -329,58 +386,251 @@ function returnToSetPosition() {
 }
 
 
-function drawBands() {
-    ctx.beginPath();
-    // Band between first and second board
-    ctx.moveTo(boards[0].x, boards[0].y + boards[0].height / 2);
-    ctx.lineTo(boards[1].x, boards[1].y - boards[1].height / 2);
-    
-    // Band between second and third board
-    ctx.moveTo(boards[1].x, boards[1].y + boards[1].height / 2);
-    ctx.lineTo(boards[2].x, boards[2].y - boards[2].height / 2);
+// Helper function to get top or bottom point of a board based on its rotation
+function getBoardPoint(board, isTop) {
+    const angleRad = board.angle * Math.PI / 180;
+    const dx = Math.cos(angleRad) * board.width / 2;
+    const dy = Math.sin(angleRad) * board.width / 2;
+    return {
+        x: board.x + (isTop ? -dx : dx),
+        y: board.y + (isTop ? -dy : dy)
+    };
+}
 
+
+// function drawMuscles() {
+//     ctx.beginPath();
+//     ctx.strokeStyle = 'yellow';
+//     ctx.lineWidth = 5;
+//     boards.forEach((board, index) => {
+//         if (index < boards.length - 1 && board.muscleDots && boards[index + 1].muscleDots) {
+//             const nextBoard = boards[index + 1];
+//             // Draw lines between muscle dots of adjacent boards
+//             ctx.moveTo(board.x + board.muscleDots[0].x, board.y + board.muscleDots[0].y);
+//             ctx.lineTo(nextBoard.x + nextBoard.muscleDots[0].x, nextBoard.y + nextBoard.muscleDots[0].y);
+//             ctx.moveTo(board.x + board.muscleDots[1].x, board.y + board.muscleDots[1].y);
+//             ctx.lineTo(nextBoard.x + nextBoard.muscleDots[1].x, nextBoard.y + nextBoard.muscleDots[1].y);
+//         }
+//     });
+//     ctx.stroke();
+// }
+
+
+
+function drawMuscles() {
+    ctx.beginPath();
     ctx.strokeStyle = 'yellow';
-    ctx.lineWidth = 5; // Width of the band
+    ctx.lineWidth = 5;
+
+    for (let i = 0; i < boards.length - 1; i++) {
+        if (boards[i].muscleDots && boards[i + 1].muscleDots) {
+            const currentBoardDots = boards[i].muscleDots.map(dot => ({
+                x: boards[i].x + dot.x,
+                y: boards[i].y + dot.y
+            }));
+            const nextBoardDots = boards[i + 1].muscleDots.map(dot => ({
+                x: boards[i + 1].x + dot.x,
+                y: boards[i + 1].y + dot.y
+            }));
+
+            // Draw bands from each muscle dot to the corresponding dot on the next board
+            currentBoardDots.forEach((dot, index) => {
+                ctx.moveTo(dot.x, dot.y);
+                ctx.lineTo(nextBoardDots[index].x, nextBoardDots[index].y);
+            });
+        }
+    }
     ctx.stroke();
 }
 
-function drawMuscles() {
-    currentmode = "muscles";
-    redraw(); // Clear and redraw the scene
-    drawBands(); // Draw the band
+
+// // Draw dynamic muscles (bands and dots)
+// function drawMuscles() {
+//     // Draw bands
+//     ctx.beginPath();
+//     ctx.strokeStyle = 'yellow';
+//     ctx.lineWidth = 5;
+
+//     boards.forEach((board, index) => {
+//         if (index < boards.length - 1) {
+//             const nextBoard = boards[index + 1];
+//             const startDot = board.dots[0]; // Use the first dot as connection start
+//             const endDot = nextBoard.dots[0]; // Use the first dot of the next board as connection end
+
+//             // Calculate start and end points for the band
+//             let startX = board.x + startDot.x;
+//             let startY = board.y + startDot.y;
+//             let endX = nextBoard.x + endDot.x;
+//             let endY = nextBoard.y + endDot.y;
+
+//             ctx.moveTo(startX, startY);
+//             ctx.lineTo(endX, endY);
+//         }
+//     });
+//     ctx.stroke();
+
+//     // Draw extra dots for each board
+//     boards.forEach(board => {
+//         const angle = board.angle * Math.PI / 180;
+//         const muscleDotX = board.x + Math.cos(angle) * (board.width / 2 + 20); // Position offset for demonstration
+//         const muscleDotY = board.y + Math.sin(angle) * (board.width / 2 + 20); // Position offset for demonstration
+        
+//         ctx.beginPath();
+//         ctx.arc(muscleDotX, muscleDotY, 5, 0, 2 * Math.PI);
+//         ctx.fillStyle = 'yellow'; // Extra dot color
+//         ctx.fill();
+//     });
+// }
+
+// Initialize drawing
+draw();
+
+
+
+
+
+function getRotatedDot(board) {
+    const angleRad = board.angle * Math.PI / 180;
+    return {
+        x: board.x + board.width / 2 * Math.cos(angleRad) - board.height / 2 * Math.sin(angleRad),
+        y: board.y + board.width / 2 * Math.sin(angleRad) + board.height / 2 * Math.cos(angleRad)
+    };
 }
 
-function showMuscles() {
+
+function animateMuscles() {
+    const duration = 1000; // Duration of the animation in milliseconds
+    let start = null;
+
+    function step(timestamp) {
+        if (!start) start = timestamp;
+        const progress = (timestamp - start) / duration;
+
+        draw(); // Redraw boards
+        drawBands(); // Redraw bands with animation effect
+        
+        if (progress < 1) {
+            window.requestAnimationFrame(step);
+        }
+    }
+
+    window.requestAnimationFrame(step);
+}
+
+
+
+
+function animateMuscles() {
+    const numberOfDots = 10; // Number of dots per band
+    const animationSteps = 100; // Number of animation steps
+    let step = 0;
+
+    function animate() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        draw(); // Redraw all static elements
+        drawBands(); // Redraw bands
+
+        // Draw dynamic dots along the bands
+        boards.forEach((board, index) => {
+            if (index < boards.length - 1) {
+                const startDot = getRotatedDot(boards[index]);
+                const endDot = getRotatedDot(boards[index + 1]);
+                
+                for (let i = 0; i <= numberOfDots; i++) {
+                    const progress = i / numberOfDots + (step / animationSteps) * (1 / numberOfDots);
+                    const dotX = startDot.x + (endDot.x - startDot.x) * progress;
+                    const dotY = startDot.y + (endDot.y - startDot.y) * progress;
+                    
+                    ctx.beginPath();
+                    ctx.arc(dotX, dotY, 3, 0, 2 * Math.PI); // Smaller dot size for effect
+                    ctx.fillStyle = 'yellow';
+                    ctx.fill();
+                }
+            }
+        });
+
+        step++;
+        if (step < animationSteps) {
+            requestAnimationFrame(animate);
+        } else {
+            step = 0; // Reset animation
+        }
+    }
+
+    animate();
+}
+
+function rotateToInitialPosition() {
+    const duration = 2000; // Animation duration in milliseconds
+    const start = performance.now();
+
+    function animate(time) {
+        let timeFraction = (time - start) / duration;
+        if (timeFraction > 1) timeFraction = 1;
+
+        boards.forEach(board => {
+            const angleDifference = board.initialAngle - board.angle;
+            board.angle += angleDifference * timeFraction;
+        });
+
+        draw();
+
+        if (timeFraction < 1) {
+            requestAnimationFrame(animate);
+        }
+    }
+
+    requestAnimationFrame(animate);
+}
+
+draw();
+
+function animateToInitialPosition() {
+    let interval = setInterval(() => {
+        let isAnimating = false;
+        boards.forEach(board => {
+            const angleDifference = board.initialAngle - board.angle;
+            if (Math.abs(angleDifference) > 0.1) {
+                isAnimating = true;
+                board.angle += angleDifference * 0.05;
+            } else {
+                board.angle = board.initialAngle;
+            }
+        });
+
+        draw();
+
+        if (!isAnimating) {
+            clearInterval(interval);
+        }
+    }, 150);
+}
+
+
+
+document.getElementById('showMusclesBtn').addEventListener('click', function() {
     if (!isPositionSet) {
-        showPopup("No muscles shown. Set positions first.");
+        alert("Set positions first.");
         return;
     }
-    redraw(); // Clear and redraw the scene
-    drawMuscles(); // Draw the muscles
-}
+    animateMuscles();
+});
 
-document.getElementById('showMusclesBtn').addEventListener('click', showMuscles);
-
-
-
-// Modify the showMuscles function to draw muscles
-function showMuscles() {
-
+document.getElementById('showMusclesBtn').addEventListener('click', function() {
     if (!isPositionSet) {
-        showPopup("No muscles shown. Set positions first.");
+        alert("Set positions first.");
         return;
     }
-    redraw(); // Clear and redraw the scene
-    drawMuscles(); // Draw the muscles
-    // Optionally draw arrows or other annotations if needed
-}
-function redraw() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear the canvas
-    draw(); // Redraw all elements
-}
-// Initialize the drawing
+    showMuscles = !showMuscles;
+    animateToInitialPosition();
+    // Toggle the display of muscles
+    draw(); // Redraw to show/hide muscles
+});
+// Redraw everything initially
+draw();
+
 draw();
 // Event listeners for buttons
-document.getElementById('relaxBtn').addEventListener('click', relax);
+// document.getElementById('relaxBtn').addEventListener('click', relax);
 document.getElementById('returnToSetPositionBtn').addEventListener('click', returnToSetPosition);
 // document.getElementById('showMusclesBtn').addEventListener('click', showMuscles);

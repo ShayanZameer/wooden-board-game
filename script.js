@@ -20,15 +20,7 @@ function showPopup(message) {
     alert(message);
 }
 
-// function calculateRotationAngle(mouseY) {
-//     if (selectedBoardIndex !== null) {
-//         const board = boards[selectedBoardIndex];
-//         const dy = mouseY - initialMouseY;
-//         board.angle += dy * 0.5; // Change 0.5 to adjust sensitivity
-//         initialMouseY = mouseY; // Update initialMouseY to the new position after calculation
-//         draw(); // Redraw to update board position
-//     }
-// }
+
 
 
 
@@ -40,6 +32,8 @@ const boards = [
         angle: 90, 
         setAngle: 90,
         initialAngle: 90,
+        pivot: 'top', // Add this new property
+
         x: 270, 
         y: 120,
         setX: 230,
@@ -60,6 +54,8 @@ const boards = [
         height: 28, 
         angle: 90, 
         setAngle: 90,
+        pivot: 'top', // Add this new property
+
         initialAngle: 90,
         x: 270, 
         y: 280, 
@@ -81,8 +77,9 @@ const boards = [
         angle: 125, 
         setAngle: 125,
         initialAngle: 125,
-        x: 270, 
-        y: 363,
+        
+        x: 310, 
+        y: 380,
         dots: [{ x: 65, y: 8 }],
         muscleDots: [],
         muscleDotConfig: [
@@ -99,48 +96,37 @@ const boards = [
 
 
 
+
+
+
+
 function drawBoard(board) {
     ctx.save();
     
-    // Translate context to the center of the board
-    ctx.translate(board.x + board.width / 2, board.y + board.height / 2);
+    // Translate context to the rotation axis, which is the left end of the board
+    ctx.translate(board.x, board.y);
     
-    // Rotate around the center of the board
+    // Rotate around this new pivot point
     ctx.rotate(board.angle * Math.PI / 180);
     
-    // Draw the board, considering the translation made the center of the canvas the center of the board
+    // Draw the board. Since we've translated to the left end, no need to adjust x for drawing
     ctx.fillStyle = '#FFDB58';
-    ctx.fillRect(-board.width / 2, -board.height / 2, board.width, board.height);
+    ctx.fillRect(0, -board.height / 2, board.width, board.height);
     
-    // Draw original black dots and muscle dots
+    // Draw the dots
     ctx.fillStyle = 'black';
     board.dots.forEach(dot => {
         ctx.beginPath();
-        // The dot's coordinates need to be offset by the center of the board
-        ctx.arc(dot.x - board.width / 2, dot.y - board.height / 2, 5, 0, Math.PI * 2);
+        ctx.arc(dot.x, dot.y - board.height / 2, 5, 0, Math.PI * 2);
         ctx.fill();
     });
 
-    // Draw red muscle dots if muscles are shown
-    // if (showMuscles) {
-    //     const muscleDots = calculateMuscleDotPositions(board);
-    //     ctx.fillStyle = 'red';
-    //     muscleDots.forEach(dot => {
-    //         ctx.beginPath();
-    //         // The muscle dot's coordinates need to be offset by the center of the board
-            
-    //         ctx.arc(dot.x+10, dot.y+20, 5, 0, 2 * Math.PI);
-    //         ctx.fill();
-    //     });
-    //     board.muscleDots = muscleDots; // Save the muscle dot positions for later use in drawing bands
-    // }
-
-     if (showMuscles) {
+    if (showMuscles) {
         const muscleDots = calculateMuscleDotPositions(board);
         ctx.fillStyle = 'red';
         muscleDots.forEach(dot => {
             ctx.beginPath();
-            ctx.arc(dot.x - (board.x + board.width / 2), dot.y - (board.y + board.height / 2), 5, 0, 2 * Math.PI);
+            ctx.arc(dot.x - board.x, dot.y - (board.y + board.height / 2), 5, 0, 2 * Math.PI);
             ctx.fill();
         });
         board.muscleDots = muscleDots; // Save positions for drawing bands
@@ -148,6 +134,7 @@ function drawBoard(board) {
 
     ctx.restore();
 }
+
 
 function draw() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -163,27 +150,7 @@ function draw() {
 
 
 
-// function drawAdditionalDots() {
-//     boards.forEach(board => {
-//         board.additionalDots.forEach((dot, index) => {
-//             // Calculate the angle including the board's current angle and the dot's specific angle offset
-//             const angleWithOffset = (board.angle + dot.angleOffset) * Math.PI / 180;
-            
-//             // Dynamic distance to place dots further apart or based on some logic
-//             const dynamicDistance = board.width / 2 + 30 + index * 10; // Adjust spacing based on index
 
-//             // Calculate position based on the board's center, adjusted angle, and dynamic distance
-//             const muscleDotX = board.x + Math.cos(angleWithOffset) * dynamicDistance + dot.offsetX;
-//             const muscleDotY = board.y + Math.sin(angleWithOffset) * dynamicDistance + dot.offsetY;
-            
-//             // Draw the dot
-//             ctx.beginPath();
-//             ctx.arc(muscleDotX, muscleDotY, 5, 0, 2 * Math.PI);
-//             ctx.fillStyle = 'red'; // Use red to indicate these are the additional muscle dots
-//             ctx.fill();
-//         });
-//     });
-// }
 
 
 
@@ -594,64 +561,10 @@ function animateToInitialPosition() {
     
 }
 
-// function animateToInitialPosition() {
-//     let interval = setInterval(() => {
-//         let isAnimating = false;
-//         boards.forEach(board => {
-//             const angleDifference = board.initialAngle - board.angle;
-//             if (Math.abs(angleDifference) > 0.1) {
-//                 isAnimating = true;
-//                 board.angle += angleDifference * 0.05;
-//                 board.muscleDots = calculateMuscleDotPositions(board); // Recalculate positions during animation
-//             } else if (isAnimating) {
-//                 board.angle = board.initialAngle;
-//             }
-//         });
-
-//         draw(); // Make sure this draws both boards and muscle dots/bands
-
-//         if (!isAnimating) {
-//             clearInterval(interval);
-//         }
-//     }, 50);
-// }
 
 
 
 
-//this code is okay
-
-
-
-
-// function calculateMuscleDotPositions(board) {
-//     const muscleDots = [];
-//     const angleRad = board.angle * Math.PI / 180; // Convert board angle to radians
-
-//     board.muscleDotConfig.forEach(config => {
-//         const totalAngle = angleRad + config.angleOffset;
-//         const x = Math.cos(totalAngle) * config.offset + config.xOffset; // Add xOffset
-//         const y = Math.sin(totalAngle) * config.offset + config.yOffset; // Add yOffset
-//         muscleDots.push({ x, y });
-//     });
-
-//     return muscleDots;
-// }
-
-// function calculateMuscleDotPositions(board) {
-//     const muscleDots = [];
-//     const angleRad = board.angle * Math.PI / 180; // Convert board angle to radians
-
-//     board.muscleDotConfig.forEach(config => {
-//         const totalAngle = angleRad + config.angleOffset;
-//         const x = board.x + Math.cos(totalAngle) * config.offset + config.xOffset; // Calculate x position
-//         const y = board.y + Math.sin(totalAngle) * config.offset + config.yOffset; // Calculate y position
-//         muscleDots.push({ x, y });
-//     });
-
-//     return muscleDots;
-// }
-// 
 
 
 function calculateMuscleDotPositions(board) {
@@ -695,6 +608,34 @@ function drawMuscleDotsAndBands(board) {
 }
 
 
+function animateToInitialPosition(duration, stepSize) {
+    let interval = setInterval(() => {
+        let isAnimating = false;
+        boards.forEach(board => {
+            const angleDifference = board.initialAngle - board.angle;
+            if (Math.abs(angleDifference) > 0.1) {
+                isAnimating = true;
+                board.angle += angleDifference * stepSize; // Adjust step size to control the speed
+            } else {
+                board.angle = board.initialAngle; // Snap to the exact initial angle once close enough
+            }
+        });
+
+        draw(); // Redraw the boards
+
+        if (!isAnimating) {
+            clearInterval(interval);
+            showMuscles = false; // Ensure muscles are hidden after animation
+
+            draw(); // Ensure one final redraw to hide muscles
+          
+        }
+        relax()
+    }, duration); // Duration between steps of the interval
+}
+
+
+
 
 
 
@@ -706,23 +647,20 @@ document.getElementById('showMusclesBtn').addEventListener('click', function() {
         alert("Set positions first.");
         return;
     }
-    animateMuscles();
-    updateDotPositions(); // Update positions based on the current
 
-
-
-});
-
-document.getElementById('showMusclesBtn').addEventListener('click', function() {
-    if (!isPositionSet) {
-        alert("Set positions first.");
-        return;
+    showMuscles = !showMuscles; // Toggle the display of muscles
+    if (showMuscles) {
+        // Animate to show muscles slowly
+        animateToInitialPosition(50, 0.01); // Slow animation
+    } else {
+        // Animate to hide muscles, can be the same or different speed
+        animateToInitialPosition(50, 0.01); // Slow animation
     }
-    showMuscles = !showMuscles;
-    animateToInitialPosition();
-    // Toggle the display of muscles
-    draw(); // Redraw to show/hide muscles
+    draw(); // Initial draw call to update the display immediately
 });
+
+
+
 // Redraw everything initially
 draw();
 
